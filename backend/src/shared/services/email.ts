@@ -7,10 +7,10 @@ interface SendEmailParams {
 export async function sendEmail({ to, subject, html }: SendEmailParams): Promise<void> {
   const apiKey = process.env.BREVO_API_KEY;
   if (!apiKey) throw new Error('BREVO_API_KEY is not set in .env');
-
+console.log(apiKey)
   const response = await fetch('https://api.brevo.com/v3/smtp/email', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'api-key': apiKey },
+    headers: { 'accept': 'application/json', 'Content-Type': 'application/json', 'api-key': apiKey },
     body: JSON.stringify({
       sender: { name: process.env.EMAIL_FROM_NAME || 'Ordalee', email: process.env.EMAIL_FROM_ADDRESS },
       to: [{ email: to }],
