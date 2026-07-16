@@ -7,14 +7,14 @@ import { sendSuccess, sendError } from '../../shared/utils/response';
 import { AuthenticatedRequest } from './middleware/requireAuth';
 
 const REFRESH_COOKIE_NAME = 'ordalee_refresh_token';
+
 const REFRESH_COOKIE_OPTIONS = {
   httpOnly: true,
   secure: process.env.NODE_ENV === 'production',
-  sameSite: 'lax' as const,
+  sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
   maxAge: 30 * 24 * 60 * 60 * 1000,
   path: '/api/v1/auth',
 };
-
 function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
