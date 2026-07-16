@@ -6,10 +6,11 @@ import { CreateReceiptInput } from '@/features/receipts/api/receiptsApi';
 import { ReceiptForm } from '@/features/receipts/components/ReceiptForm';
 import { useMyBusiness } from '@/features/business/hooks/useMyBusiness';
 import { createReceiptOffline } from '@/features/receipts/offline/createReceiptOffline';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function NewReceiptPage() {
   const router = useRouter();
-  const { data: business } = useMyBusiness();
+  const { data: business, isLoading: businessLoading } = useMyBusiness();
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState(false);
 
@@ -21,17 +22,23 @@ export default function NewReceiptPage() {
       const { clientReceiptId } = await createReceiptOffline(business, input);
       router.push(`/receipts/local/${clientReceiptId}`);
     } catch {
-      setError(true); // an IndexedDB write itself failing — private-browsing
-      // restrictions in some browsers, not a network issue
+      setError(true);
     } finally {
       setIsSaving(false);
     }
   }
 
-  if (!business) return null;
+  if (businessLoading || !business) {
+    return (
+      <div className="mx-auto max-w-3xl p-4 md:p-8">
+        <Skeleton className="mb-4 h-8 w-40 rounded-lg" />
+        <Skeleton className="h-64 rounded-xl" />
+      </div>
+    );
+  }
 
   return (
-    <div className="p-4">
+    <div className="mx-auto max-w-3xl p-4 md:p-8">
       <h1 className="mb-4 text-2xl font-semibold">New receipt</h1>
       <ReceiptForm currency={business.currency} taxPercentage={business.taxPercentage}
         onSubmit={handleSubmit} isPending={isSaving} />

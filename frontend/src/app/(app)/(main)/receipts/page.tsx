@@ -6,6 +6,8 @@ import { useQuery } from '@tanstack/react-query';
 import { Search } from 'lucide-react';
 import { useMyBusiness } from '@/features/business/hooks/useMyBusiness';
 import { listReceiptsRequest } from '@/features/receipts/api/receiptsApi';
+import { usePendingReceipts } from '@/features/receipts/offline/usePendingReceipts';
+import { pendingToReceipt } from '@/features/receipts/offline/pendingToReceipt';
 import { formatMinor } from '@/lib/utils/money';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -30,6 +32,7 @@ export default function ReceiptsListPage() {
   const [preset, setPreset] = useState<FilterPreset>('all');
   const [customDate, setCustomDate] = useState('');
   const [page, setPage] = useState(1);
+  const pending = usePendingReceipts(business?._id);
 
   const from = (() => {
     const now = new Date();
@@ -51,6 +54,14 @@ export default function ReceiptsListPage() {
   });
 
   if (!business) return null;
+
+  // Pending receipts only surface on the default, unfiltered first page —
+  // they're a temporary local overlay, not part of the server's paginated
+  // result set, so mixing them into a filtered or paged view would make
+  // the counts lie. They vanish on their own once synced.
+  const showPending = preset === 'all' && !search && page === 1;
+  const pendingReceipts = showPending ? pending.map((p) => pendingToReceipt(p, business)) : [];
+  const hasAnyResults = pendingReceipts.length > 0 || (data && data.receipts.length > 0);
 
   return (
     <div className="mx-auto max-w-3xl p-4 md:p-8">
@@ -82,14 +93,26 @@ export default function ReceiptsListPage() {
         <div className="space-y-2">
           {[...Array(6)].map((_, i) => <Skeleton key={i} className="h-16 rounded-xl" />)}
         </div>
-      ) : !data || data.receipts.length === 0 ? (
+      ) : !hasAnyResults ? (
         <Card elevation="sm" className="border-dashed p-8 text-center text-sm text-muted-foreground">
           {search || preset !== 'all' ? 'No receipts match this filter.' : "You haven't created any receipts yet."}
         </Card>
       ) : (
         <>
           <div className="space-y-2">
-            {data.receipts.map((receipt, i) => (
+            {pendingReceipts.map((receipt) => (
+              <Link key={receipt._id} href={`/receipts/local/${receipt.clientReceiptId}`} className="block">
+                <Card elevation="sm" className="flex items-center justify-between border-secondary/40 bg-secondary/10 p-3">
+                  <div>
+                    <p className="text-sm font-medium">{receipt.receiptNumber}</p>
+                    <p className="text-xs text-muted-foreground">{receipt.customerName || 'Walk-in customer'} · Syncing…</p>
+                  </div>
+                  <p className="font-money text-sm font-semibold">{formatMinor(receipt.totalMinor, business.currency)}</p>
+                </Card>
+              </Link>
+            ))}
+
+            {data?.receipts.map((receipt, i) => (
               <Link key={receipt._id} href={`/receipts/${receipt._id}`}
                 style={{ animationDelay: `${Math.min(i, 10) * 30}ms` }} className="animate-fade-in-up block">
                 <Card elevation="sm" className="flex items-center justify-between p-3 transition-shadow hover:shadow-(--shadow-md)">
@@ -106,7 +129,7 @@ export default function ReceiptsListPage() {
             ))}
           </div>
 
-          {data.total > data.limit && (
+          {data && data.total > data.limit && (
             <div className="mt-4 flex items-center justify-between">
               <Button variant="outline" disabled={page === 1} onClick={() => setPage((p) => p - 1)}>Previous</Button>
               <span className="text-sm text-muted-foreground">Page {page} of {Math.ceil(data.total / data.limit)}</span>

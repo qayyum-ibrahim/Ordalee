@@ -12,6 +12,8 @@ import { BusinessForm } from '@/features/business/components/BusinessForm';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { syncAllPending, countUnsyncedReceipts } from '@/features/receipts/offline/syncEngine';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { useState } from 'react';
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -42,27 +44,19 @@ export default function SettingsPage() {
     },
   });
 
-  async function handleLogout() {
+ const [pendingLogoutCount, setPendingLogoutCount] = useState<number | null>(null);
+
+async function handleLogoutClick() {
   if (!business) return;
-
   if (navigator.onLine) {
-    await syncAllPending(business); // give any queued receipts one last chance to reach the server
+    await syncAllPending(business);
   }
-
   const unsyncedCount = await countUnsyncedReceipts(business._id);
   if (unsyncedCount > 0) {
-    // Native confirm for now, deliberately — a proper styled confirmation
-    // dialog needs real behavior (focus trap, escape-to-close), same
-    // category as Select. Worth building once, properly, in Milestone 11
-    // — not hand-rolled as a one-off here.
-    const proceed = window.confirm(
-      `You have ${unsyncedCount} receipt${unsyncedCount === 1 ? '' : 's'} that ${unsyncedCount === 1 ? "hasn't" : "haven't"} synced yet. ` +
-      `They'll stay saved on this device and sync automatically next time you log in here — nothing is deleted. Log out now?`
-    );
-    if (!proceed) return;
+    setPendingLogoutCount(unsyncedCount);
+  } else {
+    logoutMutation.mutate();
   }
-
-  logoutMutation.mutate();
 }
   if (!business) return null;
 
@@ -79,10 +73,19 @@ export default function SettingsPage() {
       <Card elevation="sm" className="mt-6 p-5">
         <h2 className="mb-1 text-sm font-medium text-muted-foreground">Account</h2>
         <p className="mb-4 text-sm text-muted-foreground">Sign out of Ordalee on this device.</p>
-       <Button variant="outline" className="w-full" disabled={logoutMutation.isPending} onClick={handleLogout}>
+       <Button variant="outline" className="w-full" disabled={logoutMutation.isPending} onClick={handleLogoutClick}>
           <LogOut className="mr-2 h-4 w-4" />
           {logoutMutation.isPending ? 'Logging out…' : 'Log out'}
         </Button>
+        <ConfirmDialog
+  open={pendingLogoutCount !== null}
+  onOpenChange={(open) => { if (!open) setPendingLogoutCount(null); }}
+  title="Unsynced receipts on this device"
+  description={`You have ${pendingLogoutCount} receipt${pendingLogoutCount === 1 ? '' : 's'} that ${pendingLogoutCount === 1 ? "hasn't" : "haven't"} synced yet. They'll stay saved on this device and sync automatically next time you log in here — nothing is deleted. Log out now?`}
+  confirmLabel="Log out anyway"
+  cancelLabel="Stay logged in"
+  onConfirm={() => { setPendingLogoutCount(null); logoutMutation.mutate(); }}
+/>
       </Card>
     </div>
   );
