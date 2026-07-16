@@ -17,7 +17,7 @@ export default function RegisterPage() {
 
   const mutation = useMutation({
     mutationFn: () => registerRequest(email, password),
-    onSuccess: () => router.push('/login'),
+    onSuccess: () => router.push(`/check-email?email=${encodeURIComponent(email)}`),
   });
 
   function handleSubmit(e: FormEvent) {

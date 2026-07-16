@@ -33,3 +33,20 @@ export async function refreshRequest() {
 export async function logoutRequest() {
   await apiClient.post('/auth/logout');
 }
+
+export async function verifyEmailRequest(token: string) {
+  const { data } = await apiClient.post('/auth/verify-email', { token });
+  return data;
+}
+export async function resendVerificationRequest(email: string) {
+  const { data } = await apiClient.post('/auth/resend-verification', { email });
+  return data;
+}
+export async function forgotPasswordRequest(email: string) {
+  const { data } = await apiClient.post('/auth/forgot-password', { email });
+  return data;
+}
+export async function resetPasswordRequest(token: string, newPassword: string) {
+  const { data } = await apiClient.post('/auth/reset-password', { token, newPassword });
+  return data;
+}
