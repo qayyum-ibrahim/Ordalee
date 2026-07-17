@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { PasswordInput } from '@/components/ui/password-input';
+import { getApiErrorMessage } from '@/lib/utils/apiError';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -22,11 +23,6 @@ export default function RegisterPage() {
     onSuccess: () => router.push(`/check-email?email=${encodeURIComponent(email)}`),
   });
 
-// Access the nested Axios error structure safely
-const axiosError = mutation.error as any;
-const backendErrorMessage = axiosError?.response?.data?.error?.message 
-  || axiosError?.message 
-  || "An unexpected error occurred.";
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -49,7 +45,7 @@ const backendErrorMessage = axiosError?.response?.data?.error?.message
             <PasswordInput id="password" placeholder="Minimum 8 characters" value={password}
               onChange={(e) => setPassword(e.target.value)} required />
           </div>
-          {mutation.isError && (<p className="text-sm text-red-600">{backendErrorMessage}</p>)}
+          {mutation.isError && <p className="text-sm text-red-600">{getApiErrorMessage(mutation.error)}</p>}
 
           <Button type="submit" className="w-full" disabled={mutation.isPending}>
             {mutation.isPending ? 'Creating account…' : 'Create account'}

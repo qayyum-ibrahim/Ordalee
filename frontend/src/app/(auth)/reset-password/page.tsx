@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { getSupportWhatsAppLink } from '@/lib/constants/support';
 import { PasswordInput } from '@/components/ui/password-input';
+import { getApiErrorCode, getApiErrorMessage } from '@/lib/utils/apiError';
 
 function ResetPasswordContent() {
   const searchParams = useSearchParams();
@@ -22,6 +23,9 @@ function ResetPasswordContent() {
     mutationFn: () => resetPasswordRequest(token!, newPassword),
     onSuccess: () => setTimeout(() => router.push('/login'), 1500),
   });
+  
+const errorCode = getApiErrorCode(mutation.error);
+const isInvalidToken = errorCode === 'INVALID_TOKEN';
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -49,13 +53,14 @@ function ResetPasswordContent() {
             <PasswordInput id="newPassword" placeholder="Minimum 8 characters" value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)} required />
           </div>
-          {mutation.isError && (
+    {mutation.isError && (
   <p className="text-sm text-red-600">
-    This link is invalid or has expired.{' '}
-    <a href={getSupportWhatsAppLink("Hi, my Ordalee password reset link isn't working.")}
-      target="_blank" rel="noopener noreferrer" className="underline">
-      Get help on WhatsApp
-    </a>
+    {isInvalidToken ? (
+      <>This link is invalid or has expired.{' '}
+        <a href={getSupportWhatsAppLink("Hi, my Ordalee password reset link isn't working.")}
+          target="_blank" rel="noopener noreferrer" className="underline">Get help on WhatsApp</a>
+      </>
+    ) : getApiErrorMessage(mutation.error)}
   </p>
 )}
           <Button type="submit" className="w-full" disabled={mutation.isPending}>

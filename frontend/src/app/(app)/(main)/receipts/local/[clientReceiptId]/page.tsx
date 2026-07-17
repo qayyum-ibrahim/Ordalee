@@ -84,6 +84,7 @@ return (
     receipt={previewReceipt}
     business={business}
     statusBadge={pending.syncStatus === 'failed' ? 'Sync failed — retrying' : 'Saved on this device · Syncing…'}
+    statusDetail={pending.syncStatus === 'failed' ? pending.lastError : undefined}
     statusVariant={pending.syncStatus === 'failed' ? 'warning' : 'info'}
   />
 );

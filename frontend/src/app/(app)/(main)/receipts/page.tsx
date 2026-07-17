@@ -100,17 +100,25 @@ export default function ReceiptsListPage() {
       ) : (
         <>
           <div className="space-y-2">
-            {pendingReceipts.map((receipt) => (
-              <Link key={receipt._id} href={`/receipts/local/${receipt.clientReceiptId}`} className="block">
-                <Card elevation="sm" className="flex items-center justify-between border-secondary/40 bg-secondary/10 p-3">
-                  <div>
-                    <p className="text-sm font-medium">{receipt.receiptNumber}</p>
-                    <p className="text-xs text-muted-foreground">{receipt.customerName || 'Walk-in customer'} · Syncing…</p>
-                  </div>
-                  <p className="font-money text-sm font-semibold">{formatMinor(receipt.totalMinor, business.currency)}</p>
-                </Card>
-              </Link>
-            ))}
+        {pending.map((p) => {
+  const receipt = pendingToReceipt(p, business);
+  return (
+    <Link key={receipt._id} href={`/receipts/local/${receipt.clientReceiptId}`} className="block">
+      <Card elevation="sm" className={cn(
+        'flex items-center justify-between border p-3',
+        p.syncStatus === 'failed' ? 'border-destructive/40 bg-destructive/5' : 'border-secondary/40 bg-secondary/10'
+      )}>
+        <div>
+          <p className="text-sm font-medium">{receipt.receiptNumber}</p>
+          <p className="text-xs text-muted-foreground">
+            {receipt.customerName || 'Walk-in customer'} · {p.syncStatus === 'failed' ? 'Sync failed — retrying' : 'Syncing…'}
+          </p>
+        </div>
+        <p className="font-money text-sm font-semibold">{formatMinor(receipt.totalMinor, business.currency)}</p>
+      </Card>
+    </Link>
+  );
+})}
 
             {data?.receipts.map((receipt, i) => (
   <Link key={receipt._id} href={`/receipts/${receipt._id}`}

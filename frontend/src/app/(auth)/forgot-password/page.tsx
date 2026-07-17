@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { getSupportWhatsAppLink } from '@/lib/constants/support';
+import { getApiErrorMessage } from '@/lib/utils/apiError';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
@@ -40,6 +41,7 @@ export default function ForgotPasswordPage() {
         <p className="mt-4 text-sm text-muted-foreground">
           <Link href="/login" className="font-medium text-primary underline underline-offset-2">Back to login</Link>
         </p>
+        {mutation.isError && <p className="mb-2 text-sm text-red-600">{getApiErrorMessage(mutation.error)}</p>}
         <p className="mt-4 text-sm text-muted-foreground">
   Trouble resetting your password?{' '}
   <a href={getSupportWhatsAppLink("Hi, I'm having trouble resetting my Ordalee password.")}

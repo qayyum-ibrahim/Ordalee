@@ -11,17 +11,19 @@ import { Receipt, voidReceiptRequest, restoreReceiptRequest } from '../api/recei
 import { Business } from '@/features/business/api/businessApi';
 import { useShareReceipt } from '../hooks/useShareReceipt';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 interface ReceiptSummaryCardProps {
   receipt: Receipt;
   business: Business;
   statusBadge?: string;
+  statusDetail?: string;
   statusVariant?: 'info' | 'warning';
   showVoidAction?: boolean;
 }
 
 export function ReceiptSummaryCard({
-  receipt, business, statusBadge, statusVariant = 'info', showVoidAction = true,
+  receipt, business, statusBadge, statusDetail, statusVariant = 'info', showVoidAction = true,
 }: ReceiptSummaryCardProps) {
   const { isGenerating, downloadPdf, shareToWhatsApp } = useShareReceipt();
   const queryClient = useQueryClient();
@@ -34,14 +36,16 @@ export function ReceiptSummaryCard({
     queryClient.invalidateQueries({ queryKey: ['dashboard', business._id] });
   }
 
-  const voidMutation = useMutation({
-    mutationFn: () => voidReceiptRequest(business._id, receipt._id),
-    onSuccess: invalidateAfterStatusChange,
-  });
-  const restoreMutation = useMutation({
-    mutationFn: () => restoreReceiptRequest(business._id, receipt._id),
-    onSuccess: invalidateAfterStatusChange,
-  });
+const voidMutation = useMutation({
+  mutationFn: () => voidReceiptRequest(business._id, receipt._id),
+  onSuccess: invalidateAfterStatusChange,
+  onError: () => toast.error("Couldn't void the receipt. Try again."),
+});
+const restoreMutation = useMutation({
+  mutationFn: () => restoreReceiptRequest(business._id, receipt._id),
+  onSuccess: invalidateAfterStatusChange,
+  onError: () => toast.error("Couldn't restore the receipt. Try again."),
+});
 
   return (
     <div className="mx-auto max-w-lg p-4 md:p-8">
@@ -55,16 +59,19 @@ export function ReceiptSummaryCard({
           </div>
         </div>
 
-        {isVoid ? (
+        {isVoid && (
           <span className="mb-2 inline-block rounded-full bg-destructive/10 px-3 py-1 text-xs font-medium text-destructive">Voided</span>
-        ) : statusBadge && (
-          <span className={cn(
-            'mb-2 inline-block rounded-full px-3 py-1 text-xs font-medium',
-            statusVariant === 'warning' ? 'bg-destructive/10 text-destructive' : 'bg-secondary/20 text-foreground'
-          )}>
-            {statusBadge}
-          </span>
         )}
+
+        {statusBadge && (
+  <>
+    <span className={cn('mb-2 inline-block rounded-full px-3 py-1 text-xs font-medium',
+      statusVariant === 'warning' ? 'bg-destructive/10 text-destructive' : 'bg-secondary/20 text-foreground')}>
+      {statusBadge}
+    </span>
+    {statusDetail && <p className="mb-2 text-xs text-muted-foreground">{statusDetail}</p>}
+  </>
+)}
         <p className={cn('text-2xl font-semibold', isVoid ? 'text-muted-foreground line-through' : 'text-primary')}>{receipt.receiptNumber}</p>
         <p className={cn('font-money mt-2 text-3xl font-bold', isVoid && 'text-muted-foreground line-through')}>
           {formatMinor(receipt.totalMinor, business.currency)}

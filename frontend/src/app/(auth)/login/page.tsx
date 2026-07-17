@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { PasswordInput } from '@/components/ui/password-input';
+import { getApiErrorCode, getApiErrorMessage } from '@/lib/utils/apiError';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -24,13 +25,16 @@ export default function LoginPage() {
     onSuccess: (data) => { setAccessToken(data.accessToken); router.push('/dashboard'); },
   });
 
+  const axiosError = mutation.error as AxiosError | undefined;
+const isNetworkError = mutation.isError && !axiosError?.response;
+const errorCode = getApiErrorCode(mutation.error);
+const isUnverified = errorCode === 'EMAIL_NOT_VERIFIED';
+const isRateLimited = errorCode === 'RATE_LIMITED';
+
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
     mutation.mutate();
   }
-
-  const errorCode = (mutation.error as AxiosError<{ error?: { code?: string } }>)?.response?.data?.error?.code;
-  const isUnverified = errorCode === 'EMAIL_NOT_VERIFIED';
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background p-6">
@@ -49,13 +53,15 @@ export default function LoginPage() {
             </div>
             <PasswordInput id="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
           </div>
-          {mutation.isError && !isUnverified && <p className="text-sm text-red-600">Incorrect email or password.</p>}
-          {isUnverified && (
-            <p className="text-sm text-red-600">
-              Please verify your email first.{' '}
-              <Link href={`/check-email?email=${encodeURIComponent(email)}`} className="underline">Resend the link</Link>
-            </p>
-          )}
+          {isNetworkError && <p className="text-sm text-red-600">Couldn't connect. Check your internet connection and try again.</p>}
+{isRateLimited && <p className="text-sm text-red-600">{getApiErrorMessage(mutation.error)}</p>}
+{mutation.isError && !isNetworkError && !isRateLimited && !isUnverified && <p className="text-sm text-red-600">Incorrect email or password.</p>}
+{isUnverified && (
+  <p className="text-sm text-red-600">
+    Please verify your email first.{' '}
+    <Link href={`/check-email?email=${encodeURIComponent(email)}`} className="underline">Resend the link</Link>
+  </p>
+)}
           <Button type="submit" className="w-full" disabled={mutation.isPending}>
             {mutation.isPending ? 'Logging in…' : 'Log in'}
           </Button>

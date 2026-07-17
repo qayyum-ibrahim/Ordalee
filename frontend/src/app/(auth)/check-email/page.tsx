@@ -13,8 +13,12 @@ function CheckEmailContent() {
   const searchParams = useSearchParams();
   const email = searchParams.get('email') || '';
   const [sent, setSent] = useState(false);
-  const mutation = useMutation({ mutationFn: () => resendVerificationRequest(email), onSuccess: () => setSent(true) });
-
+  const [resendError, setResendError] = useState(false);
+const mutation = useMutation({
+  mutationFn: () => resendVerificationRequest(email),
+  onSuccess: () => setSent(true),
+  onError: () => setResendError(true),
+});
   return (
     <Card elevation="md" className="w-full max-w-sm p-6 text-center md:p-8">
       <div className="mb-4 flex justify-center">
@@ -32,6 +36,7 @@ function CheckEmailContent() {
       <p className="mt-4 text-sm text-muted-foreground">
         <Link href="/login" className="font-medium text-primary underline underline-offset-2">Back to login</Link>
       </p>
+      {resendError && <p className="mt-2 text-sm text-red-600">Couldn't resend right now. Try again in a moment.</p>}
     </Card>
   );
 }

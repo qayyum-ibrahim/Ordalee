@@ -15,6 +15,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { syncAllPending, countUnsyncedReceipts } from '@/features/receipts/offline/syncEngine';
+import { getApiErrorMessage } from '@/lib/utils/apiError';
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -57,12 +58,14 @@ export default function SettingsPage() {
         <h2 className="mb-3 text-sm font-medium text-muted-foreground">Business logo</h2>
         <LogoUpload currentLogoUrl={business.logoUrl} onUploaded={(url) => logoMutation.mutate(url)} />
         {logoMutation.isSuccess && <p className="mt-3 text-sm text-green-600">Logo saved.</p>}
+        {logoMutation.isError && <p className="mt-3 text-sm text-red-600">Logo uploaded, but saving it failed. Try again.</p>}
       </Card>
 
       <Card elevation="sm" className="p-5">
         <BusinessForm initialValues={business} onSubmit={(input) => updateMutation.mutate(input)}
           isPending={updateMutation.isPending} submitLabel="Save changes" />
         {updateMutation.isSuccess && <p className="mt-4 text-sm text-green-600">Saved.</p>}
+        {updateMutation.isError && <p className="mt-4 text-sm text-red-600">{getApiErrorMessage(updateMutation.error)}</p>}
       </Card>
 
       <Card elevation="sm" className="mt-6 p-5">

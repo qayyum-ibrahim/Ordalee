@@ -1,5 +1,6 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { useAuthStore } from '@/features/auth/store/authStore';
+import { toast } from 'sonner';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '/api/v1';
 
@@ -43,12 +44,15 @@ apiClient.interceptors.response.use(
         originalRequest.headers = originalRequest.headers ?? {};
         originalRequest.headers.Authorization = `Bearer ${newToken}`;
         return apiClient(originalRequest);
-      } catch (refreshError) {
-        refreshPromise = null;
-        useAuthStore.getState().clearAuth();
-        if (typeof window !== 'undefined') window.location.href = '/login';
-        return Promise.reject(refreshError);
-      }
+     } catch (refreshError) {
+  refreshPromise = null;
+  useAuthStore.getState().clearAuth();
+  if (typeof window !== 'undefined') {
+    toast.error('Your session expired. Please log in again.');
+    window.location.href = '/login';
+  }
+  return Promise.reject(refreshError);
+  }
     }
 
     return Promise.reject(error);

@@ -5,6 +5,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createBusinessRequest } from '@/features/business/api/businessApi';
 import { BusinessForm } from '@/features/business/components/BusinessForm';
 import { useCurrentUser } from '@/features/auth/hooks/useCurrentUser';
+import { getApiErrorMessage } from '@/lib/utils/apiError';
 
 export default function BusinessSetupPage() {
   const router = useRouter();
@@ -26,7 +27,7 @@ const { data: currentUser } = useCurrentUser();
   <BusinessForm defaultEmail={currentUser?.email} onSubmit={(input) => mutation.mutate(input)}
     isPending={mutation.isPending} submitLabel="Create business" />
 </div>
-      {mutation.isError && <p className="mt-4 text-sm text-red-600">Something went wrong. Try again.</p>}
+      {mutation.isError && <p className="mt-4 text-sm text-red-600">{getApiErrorMessage(mutation.error)}</p>}
     </div>
   );
 }
