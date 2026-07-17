@@ -18,8 +18,15 @@ export default function RegisterPage() {
 
   const mutation = useMutation({
     mutationFn: () => registerRequest(email, password),
+    retry: false,
     onSuccess: () => router.push(`/check-email?email=${encodeURIComponent(email)}`),
   });
+
+// Access the nested Axios error structure safely
+const axiosError = mutation.error as any;
+const backendErrorMessage = axiosError?.response?.data?.error?.message 
+  || axiosError?.message 
+  || "An unexpected error occurred.";
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -42,7 +49,8 @@ export default function RegisterPage() {
             <PasswordInput id="password" placeholder="Minimum 8 characters" value={password}
               onChange={(e) => setPassword(e.target.value)} required />
           </div>
-          {mutation.isError && <p className="text-sm text-red-600">Something went wrong. Try a different email.</p>}
+          {mutation.isError && (<p className="text-sm text-red-600">{backendErrorMessage}</p>)}
+
           <Button type="submit" className="w-full" disabled={mutation.isPending}>
             {mutation.isPending ? 'Creating account…' : 'Create account'}
           </Button>
