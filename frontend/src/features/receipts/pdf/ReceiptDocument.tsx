@@ -70,6 +70,8 @@ const styles = StyleSheet.create({
   notes: { marginTop: 24, fontSize: 9, color: COLOR.muted, borderTop: `1 solid ${COLOR.border}`, paddingTop: 12 },
   footer: { marginTop: 32, textAlign: 'center', fontSize: 10, color: COLOR.primary, fontWeight: 700 },
   footerSub: { marginTop: 4, textAlign: 'center', fontSize: 8, color: COLOR.muted },
+  voidStamp: { position: 'absolute', top: '38%', left: '18%', transform: 'rotate(-25deg)' },
+voidStampText: { fontSize: 72, fontWeight: 700, color: 'rgba(192, 57, 43, 0.3)' },
 });
 
 interface ReceiptDocumentProps {
@@ -155,6 +157,11 @@ export function ReceiptDocument({ receipt, business }: ReceiptDocumentProps) {
           <Text style={styles.footer}>Thank you for choosing {business.name}.</Text>
           <Text style={styles.footerSub}>Generated with Ordalee</Text>
         </View>
+        {receipt.status === 'void' && (
+  <View style={styles.voidStamp}>
+    <Text style={styles.voidStampText}>VOID</Text>
+  </View>
+)}
       </Page>
     </Document>
   );

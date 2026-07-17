@@ -80,6 +80,7 @@ if (!business || pending === 'loading' || pending === null) {
 
 return (
   <ReceiptSummaryCard
+    showVoidAction={false}
     receipt={previewReceipt}
     business={business}
     statusBadge={pending.syncStatus === 'failed' ? 'Sync failed — retrying' : 'Saved on this device · Syncing…'}

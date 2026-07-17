@@ -122,3 +122,23 @@ export async function getReceiptByClientId(req: BusinessScopedRequest, res: Resp
   if (!receipt) return sendError(res, 'NOT_FOUND', 'Receipt not found.', 404);
   return sendSuccess(res, receipt);
 }
+
+export async function voidReceipt(req: BusinessScopedRequest, res: Response) {
+  const receipt = await Receipt.findOneAndUpdate(
+    { _id: req.params.id, businessId: req.business!._id.toString() },
+    { status: 'void', voidedAt: new Date() },
+    { returnDocument: 'after' }
+  );
+  if (!receipt) return sendError(res, 'NOT_FOUND', 'Receipt not found.', 404);
+  return sendSuccess(res, receipt, 'Receipt voided.');
+}
+
+export async function restoreReceipt(req: BusinessScopedRequest, res: Response) {
+  const receipt = await Receipt.findOneAndUpdate(
+    { _id: req.params.id, businessId: req.business!._id.toString() },
+    { status: 'completed', $unset: { voidedAt: 1 } },
+    { returnDocument: 'after' }
+  );
+  if (!receipt) return sendError(res, 'NOT_FOUND', 'Receipt not found.', 404);
+  return sendSuccess(res, receipt, 'Receipt restored.');
+}

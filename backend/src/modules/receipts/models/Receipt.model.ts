@@ -28,6 +28,7 @@ export interface IReceipt extends Document {
   paymentMethod: PaymentMethod; // how the already-completed sale was settled — not a payment processor
   status: ReceiptStatus;
   createdOffline: boolean;
+  voidedAt?: Date;
   clientCreatedAt: Date; // when the user actually made the sale, per their device clock
   createdAt: Date;
   updatedAt: Date;
@@ -73,6 +74,7 @@ const receiptSchema = new Schema<IReceipt>(
     },
     status: { type: String, enum: ['completed', 'void'], default: 'completed', required: true },
     createdOffline: { type: Boolean, default: false },
+    voidedAt: { type: Date },
     clientCreatedAt: { type: Date, required: true },
   },
   { timestamps: true }

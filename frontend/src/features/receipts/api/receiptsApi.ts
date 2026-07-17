@@ -26,6 +26,7 @@ export interface Receipt {
   notes?: string;
   paymentMethod: PaymentMethod;
   status: 'completed' | 'void';
+  voidedAt?: string;
   clientCreatedAt: string;
   createdAt: string;
 }
@@ -73,5 +74,14 @@ export interface ListReceiptsResponse {
 
 export async function listReceiptsRequest(businessId: string, params: ListReceiptsParams): Promise<ListReceiptsResponse> {
   const { data } = await apiClient.get<{ data: ListReceiptsResponse }>(`/businesses/${businessId}/receipts`, { params });
+  return data.data;
+}
+
+export async function voidReceiptRequest(businessId: string, receiptId: string): Promise<Receipt> {
+  const { data } = await apiClient.patch<{ data: Receipt }>(`/businesses/${businessId}/receipts/${receiptId}/void`);
+  return data.data;
+}
+export async function restoreReceiptRequest(businessId: string, receiptId: string): Promise<Receipt> {
+  const { data } = await apiClient.patch<{ data: Receipt }>(`/businesses/${businessId}/receipts/${receiptId}/restore`);
   return data.data;
 }

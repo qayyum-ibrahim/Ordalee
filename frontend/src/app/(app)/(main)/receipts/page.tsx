@@ -113,20 +113,26 @@ export default function ReceiptsListPage() {
             ))}
 
             {data?.receipts.map((receipt, i) => (
-              <Link key={receipt._id} href={`/receipts/${receipt._id}`}
-                style={{ animationDelay: `${Math.min(i, 10) * 30}ms` }} className="animate-fade-in-up block">
-                <Card elevation="sm" className="flex items-center justify-between p-3 transition-shadow hover:shadow-(--shadow-md)">
-                  <div>
-                    <p className="text-sm font-medium">{receipt.receiptNumber}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {receipt.customerName || 'Walk-in customer'} ·{' '}
-                      {new Date(receipt.clientCreatedAt).toLocaleDateString('en-NG', { day: 'numeric', month: 'short' })}
-                    </p>
-                  </div>
-                  <p className="font-money text-sm font-semibold">{formatMinor(receipt.totalMinor, business.currency)}</p>
-                </Card>
-              </Link>
-            ))}
+  <Link key={receipt._id} href={`/receipts/${receipt._id}`}
+    style={{ animationDelay: `${Math.min(i, 10) * 30}ms` }} className="animate-fade-in-up block">
+    <Card elevation="sm" className={cn(
+      'flex items-center justify-between p-3 transition-shadow hover:shadow-(--shadow-md)',
+      receipt.status === 'void' && 'opacity-60'
+    )}>
+      <div>
+        <p className={cn('text-sm font-medium', receipt.status === 'void' && 'line-through')}>{receipt.receiptNumber}</p>
+        <p className="text-xs text-muted-foreground">
+          {receipt.customerName || 'Walk-in customer'} ·{' '}
+          {new Date(receipt.clientCreatedAt).toLocaleDateString('en-NG', { day: 'numeric', month: 'short' })}
+          {receipt.status === 'void' && ' · Voided'}
+        </p>
+      </div>
+      <p className={cn('font-money text-sm font-semibold', receipt.status === 'void' && 'text-muted-foreground line-through')}>
+        {formatMinor(receipt.totalMinor, business.currency)}
+      </p>
+    </Card>
+  </Link>
+))}
           </div>
 
           {data && data.total > data.limit && (
