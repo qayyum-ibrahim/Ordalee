@@ -13,7 +13,7 @@ const REFRESH_COOKIE_NAME = 'ordalee_refresh_token';
 const REFRESH_COOKIE_OPTIONS = {
   httpOnly: true,
   secure: process.env.NODE_ENV === 'production',
-  sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
+  sameSite: 'lax' as const,
   maxAge: 30 * 24 * 60 * 60 * 1000,
   path: '/api/v1/auth',
 };

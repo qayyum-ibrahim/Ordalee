@@ -9,6 +9,7 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { PasswordInput } from '@/components/ui/password-input';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -38,7 +39,7 @@ export default function RegisterPage() {
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="password">Password</Label>
-            <Input id="password" type="password" placeholder="Minimum 8 characters" value={password}
+            <PasswordInput id="password" placeholder="Minimum 8 characters" value={password}
               onChange={(e) => setPassword(e.target.value)} required />
           </div>
           {mutation.isError && <p className="text-sm text-red-600">Something went wrong. Try a different email.</p>}

@@ -11,6 +11,7 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { PasswordInput } from '@/components/ui/password-input';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -46,7 +47,7 @@ export default function LoginPage() {
               <Label htmlFor="password">Password</Label>
               <Link href="/forgot-password" className="text-xs text-primary underline underline-offset-2">Forgot password?</Link>
             </div>
-            <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+            <PasswordInput id="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
           </div>
           {mutation.isError && !isUnverified && <p className="text-sm text-red-600">Incorrect email or password.</p>}
           {isUnverified && (

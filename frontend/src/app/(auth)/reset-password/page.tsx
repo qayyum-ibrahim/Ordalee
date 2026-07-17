@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { getSupportWhatsAppLink } from '@/lib/constants/support';
+import { PasswordInput } from '@/components/ui/password-input';
 
 function ResetPasswordContent() {
   const searchParams = useSearchParams();
@@ -45,7 +46,7 @@ function ResetPasswordContent() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1.5">
             <Label htmlFor="newPassword">New password</Label>
-            <Input id="newPassword" type="password" placeholder="Minimum 8 characters" value={newPassword}
+            <PasswordInput id="newPassword" placeholder="Minimum 8 characters" value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)} required />
           </div>
           {mutation.isError && (
