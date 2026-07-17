@@ -24,6 +24,7 @@ export interface BusinessInput {
   currency?: string;
   receiptPrefix?: string;
   taxPercentage?: number;
+  logoUrl?: string;
 }
 
 export async function getMyBusinessRequest(): Promise<Business | null> {

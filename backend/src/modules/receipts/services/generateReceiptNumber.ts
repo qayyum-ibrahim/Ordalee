@@ -9,7 +9,7 @@ export async function getNextReceiptNumber(businessId: string): Promise<string> 
   const business = await Business.findOneAndUpdate(
     { _id: businessId },
     { $inc: { receiptSequence: 1 } },
-    { new: true }
+    { returnDocument: 'after' }
   );
 
   if (!business) {

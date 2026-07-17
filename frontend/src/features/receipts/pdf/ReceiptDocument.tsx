@@ -2,6 +2,7 @@ import { Document, Page, View, Text, Image, StyleSheet, Font } from '@react-pdf/
 import { Receipt } from '../api/receiptsApi';
 import { Business } from '@/features/business/api/businessApi';
 import { formatMinor } from '@/lib/utils/money';
+import { getOptimizedImageUrl } from '@/lib/utils/cloudinaryImage';
 
 Font.register({
   family: 'NotoSans',
@@ -84,7 +85,9 @@ export function ReceiptDocument({ receipt, business }: ReceiptDocumentProps) {
       <Page size="A4" style={styles.page}>
         <View style={styles.headerBar}>
           <View>
-            {business.logoUrl && <Image src={business.logoUrl} style={styles.logo} />}
+            {business.logoUrl && (
+  <Image src={getOptimizedImageUrl(business.logoUrl, { width: 120, height: 120, format: 'jpg' })} style={styles.logo} />
+)}
             <Text style={styles.businessName}>{business.name}</Text>
             {business.phone && <Text style={styles.businessMeta}>{business.phone}</Text>}
             {business.address && <Text style={styles.businessMeta}>{business.address}</Text>}
