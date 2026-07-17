@@ -9,12 +9,15 @@ import dashboardRoutes from './modules/dashboard/dashboard.routes';
 import { requireAuth } from './modules/auth/middleware/requireAuth';
 import { requireBusinessOwnership } from './modules/business/middleware/requireBusinessOwnership';
 import { errorHandler } from './shared/middleware/errorHandler';
+import compression from 'compression';
+
 
 export function createApp() {
   const app = express();
   // BEFORE ROUTES TO TRUST RENDER'S PROXY
   app.set('trust proxy', 1);
   
+  app.use(compression());
   app.use(helmet());
   app.use(cors({ origin: process.env.FRONTEND_URL || 'http://localhost:3000', credentials: true }));
   app.use(express.json());

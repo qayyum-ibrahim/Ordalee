@@ -1,13 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { pdf } from '@react-pdf/renderer';
-import { ReceiptDocument } from '../pdf/ReceiptDocument';
 import { Receipt } from '../api/receiptsApi';
 import { Business } from '@/features/business/api/businessApi';
 import { toast } from 'sonner';
 
 async function generatePdfBlob(receipt: Receipt, business: Business): Promise<Blob> {
+  const { pdf } = await import('@react-pdf/renderer');
+  const { ReceiptDocument } = await import('../pdf/ReceiptDocument');
   return pdf(<ReceiptDocument receipt={receipt} business={business} />).toBlob();
 }
 
