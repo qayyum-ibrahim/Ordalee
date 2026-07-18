@@ -164,3 +164,7 @@ button, a {
 }
 
 body { font-family: var(--font-sans), ui-sans-serif, sans-serif; }
+
+.fab-safe-bottom {
+  bottom: calc(4.25rem + max(0.75rem, env(safe-area-inset-bottom, 0px)));
+}
