@@ -32,27 +32,29 @@ apiClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
+    const isRefreshRequest = originalRequest?.url?.includes('/auth/refresh');
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (error.response?.status === 401 && !originalRequest._retry && !isRefreshRequest) {
       originalRequest._retry = true;
       try {
-        // If several requests fail at once, they share one refresh call
-        // instead of each independently hitting /auth/refresh.
         refreshPromise = refreshPromise ?? refreshAccessToken();
         const newToken = await refreshPromise;
         refreshPromise = null;
         originalRequest.headers = originalRequest.headers ?? {};
         originalRequest.headers.Authorization = `Bearer ${newToken}`;
         return apiClient(originalRequest);
-     } catch (refreshError) {
-  refreshPromise = null;
-  useAuthStore.getState().clearAuth();
-  if (typeof window !== 'undefined') {
-    toast.error('Your session expired. Please log in again.');
-    window.location.href = '/login';
-  }
-  return Promise.reject(refreshError);
-  }
+      } catch (refreshError) {
+        refreshPromise = null;
+        useAuthStore.getState().clearAuth();
+        // Extra guard, cheap insurance against this exact failure mode
+        // recurring some other way: never force-navigate to a page
+        // we're already sitting on.
+        if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
+          toast.error('Your session expired. Please log in again.');
+          window.location.href = '/login';
+        }
+        return Promise.reject(refreshError);
+      }
     }
 
     return Promise.reject(error);
