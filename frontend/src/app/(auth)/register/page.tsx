@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { PasswordInput } from '@/components/ui/password-input';
 import { getApiErrorMessage } from '@/lib/utils/apiError';
+import { GuestGuard } from '@/features/auth/components/GuestGuard';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -30,6 +31,7 @@ export default function RegisterPage() {
   }
 
   return (
+    <GuestGuard>
     <div className="flex min-h-screen flex-col items-center justify-center bg-background p-6">
       <h1 className="mb-8 text-2xl font-bold text-primary">Ordalee</h1>
 
@@ -58,5 +60,6 @@ export default function RegisterPage() {
         <Link href="/login" className="font-medium text-primary underline underline-offset-2">Log in</Link>
       </p>
     </div>
+    </GuestGuard>
   );
 }
